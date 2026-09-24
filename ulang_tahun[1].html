@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy Birthday - My Just Friend 🎉</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 50%, #fde2e4 100%);
+      color: #333;
+      overflow-x: hidden;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Floating background icons */
+    .bg-bubbles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .bubble {
+      position: absolute;
+      bottom: -60px;
+      opacity: 0.55;
+      animation: floatUp 9s infinite linear;
+    }
+    @keyframes floatUp {
+      0% { transform: translateY(0) rotate(0deg); opacity: 0.7; }
+      100% { transform: translateY(-115vh) rotate(360deg); opacity: 0; }
+    }
+
+    /* Floating Music Controller */
+    .music-ctrl {
+      position: fixed;
+      bottom: 25px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(10px);
+      padding: 10px 18px;
+      border-radius: 50px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #ff5e7e;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      z-index: 90;
+      transition: all 0.3s;
+    }
+    .music-ctrl:hover {
+      transform: scale(1.05);
+    }
+    .music-icon {
+      font-size: 17px;
+      display: inline-block;
+    }
+    .music-playing .music-icon {
+      animation: spin 3.5s linear infinite;
+    }
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Screen 1: Welcome Overlay (Hadiah Kejutan) */
+    #welcome-screen {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      color: white;
+      text-align: center;
+      padding: 24px;
+      transition: opacity 0.8s ease, visibility 0.8s ease;
+    }
+    #welcome-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .gift-box {
+      font-size: 90px;
+      cursor: pointer;
+      margin-bottom: 20px;
+      animation: wobble 2s infinite ease-in-out;
+      filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.25));
+      transition: transform 0.25s;
+    }
+    .gift-box:hover {
+      transform: scale(1.18) rotate(-6deg);
+    }
+    @keyframes wobble {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      25% { transform: scale(1.1) rotate(-6deg); }
+      75% { transform: scale(1.1) rotate(6deg); }
+    }
+    .welcome-btn {
+      margin-top: 25px;
+      background: white;
+      color: #ff5e7e;
+      border: none;
+      padding: 15px 36px;
+      font-size: 17px;
+      font-weight: 700;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s;
+    }
+    .welcome-btn:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Wrapper Konten Utama */
+    .page-content {
+      position: relative;
+      z-index: 10;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 40px 18px 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 35px;
+    }
+
+    /* Style Kartu Umum */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(14px);
+      border-radius: 28px;
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.12);
+      padding: 35px 25px;
+      border: 2px solid rgba(255, 255, 255, 0.85);
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .glass-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 22px 55px rgba(0, 0, 0, 0.16);
+    }
+
+    /* Section 1: Hero Profile */
+    .photo-wrapper {
+      position: relative;
+      width: 175px;
+      height: 175px;
+      margin: 0 auto 20px;
+    }
+    .crown {
+      position: absolute;
+      top: -24px;
+      left: 50%;
+      transform: translateX(-50%) rotate(-10deg);
+      font-size: 42px;
+      z-index: 5;
+      animation: crownBounce 2.5s infinite ease-in-out;
+    }
+    @keyframes crownBounce {
+      0%, 100% { transform: translateX(-50%) rotate(-10deg) scale(1); }
+      50% { transform: translateX(-50%) rotate(6deg) scale(1.14); }
+    }
+    .photo-frame {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 5px solid #ff758c;
+      box-shadow: 0 14px 32px rgba(255, 117, 140, 0.45);
+      background: #f7f7f7;
+    }
+    .photo-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 36%;
+      transform: scale(1.2);
+      transition: transform 0.4s ease;
+    }
+    .photo-frame img:hover {
+      transform: scale(1.3);
+    }
+    .subtitle {
+      font-family: 'Dancing Script', cursive;
+      font-size: 36px;
+      color: #ff5e7e;
+      font-weight: 700;
+    }
+    .person-name {
+      font-size: 32px;
+      font-weight: 800;
+      color: #2d3748;
+      margin-bottom: 8px;
+      background: linear-gradient(45deg, #ff5e7e, #8e44ad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .badge-tag {
+      display: inline-block;
+      background: #ffe3ec;
+      color: #d81b60;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 6px 16px;
+      border-radius: 25px;
+      margin-bottom: 12px;
+    }
+
+    /* Section 2: Player Lagu & Petikan Lirik */
+    .song-box {
+      background: linear-gradient(135deg, #fff0f5 0%, #fdfbfb 100%);
+      border: 1px solid #ffd1dc;
+      border-radius: 20px;
+      padding: 22px 18px;
+      margin-top: 10px;
+    }
+    .song-title {
+      font-weight: 700;
+      font-size: 16px;
+      color: #d81b60;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .song-lyrics {
+      font-style: italic;
+      color: #555;
+      font-size: 14px;
+      line-height: 1.8;
+      background: rgba(255, 255, 255, 0.7);
+      padding: 12px 15px;
+      border-radius: 14px;
+      border-left: 4px solid #ff758c;
+    }
+
+    /* Section 3: Surat Panjang Untuk Sahabat */
+    .letter-section {
+      text-align: left;
+    }
+    .letter-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #ff5e7e;
+      text-align: center;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .letter-body {
+      color: #4a5568;
+      font-size: 15px;
+      line-height: 1.85;
+      font-weight: 500;
+    }
+    .letter-body p {
+      margin-bottom: 14px;
+    }
+    .letter-sign {
+      margin-top: 20px;
+      text-align: right;
+      font-family: 'Dancing Script', cursive;
+      font-size: 24px;
+      color: #ff5e7e;
+      font-weight: 700;
+    }
+
+    /* Section 4: 3 Hal Istimewa */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-top: 15px;
+    }
+    .feature-card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 18px 14px;
+      border: 1px solid #ffe3ec;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+      text-align: center;
+      transition: transform 0.3s;
+    }
+    .feature-card:hover {
+      transform: translateY(-5px);
+    }
+    .feature-icon {
+      font-size: 34px;
+      margin-bottom: 10px;
+    }
+    .feature-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: #2d3748;
+      margin-bottom: 6px;
+    }
+    .feature-desc {
+      font-size: 12.5px;
+      color: #718096;
+      line-height: 1.5;
+    }
+
+    /* Section 5: Lilin & Potong Kue Interaktif */
+    .cake-interaction {
+      margin: 15px 0 10px;
+    }
+    .candle-flame {
+      font-size: 32px;
+      display: inline-block;
+      animation: flicker 0.6s infinite alternate;
+      transition: transform 0.3s, opacity 0.3s;
+      cursor: pointer;
+    }
+    .candle-flame.blown {
+      opacity: 0.25;
+      filter: grayscale(1);
+      transform: scale(0.65);
+    }
+    @keyframes flicker {
+      from { transform: scale(1) rotate(-3deg); filter: drop-shadow(0 0 5px #ffcc00); }
+      to { transform: scale(1.15) rotate(3deg); filter: drop-shadow(0 0 12px #ff6600); }
+    }
+    .cake-wrapper {
+      font-size: 55px;
+      cursor: pointer;
+      user-select: none;
+      display: inline-block;
+      transition: transform 0.3s;
+      margin-top: -8px;
+    }
+    .cake-wrapper:hover {
+      transform: scale(1.1);
+    }
+    .cake-status-msg {
+      font-size: 14px;
+      color: #e91e63;
+      font-weight: 600;
+      margin-top: 10px;
+      min-height: 22px;
+    }
+
+    /* Section 6: Kartu Doa Pilihan */
+    .wishes-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-top: 15px;
+    }
+    .wish-box-card {
+      background: white;
+      border: 1px dashed #ff758c;
+      border-radius: 16px;
+      padding: 14px 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .wish-box-card:hover {
+      background: #fff5f7;
+      transform: scale(1.04);
+      border-style: solid;
+    }
+    .wish-box-card.opened {
+      background: linear-gradient(135deg, #ff758c, #ff7eb3);
+      color: white;
+      border-style: solid;
+      box-shadow: 0 8px 20px rgba(255, 117, 140, 0.4);
+    }
+    .wish-icon {
+      font-size: 26px;
+      margin-bottom: 6px;
+    }
+    .wish-name {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    /* Section 7: Love Counter & Pelukan */
+    .love-btn {
+      background: linear-gradient(45deg, #ff416c, #ff4b2b);
+      color: white;
+      border: none;
+      padding: 14px 34px;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 8px 22px rgba(255, 65, 108, 0.4);
+      transition: all 0.3s;
+      margin-top: 12px;
+    }
+    .love-btn:hover {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 12px 28px rgba(255, 65, 108, 0.6);
+    }
+    .love-btn:active {
+      transform: scale(0.95);
+    }
+    .love-counter {
+      font-size: 18px;
+      font-weight: 700;
+      color: #ff416c;
+      margin-top: 12px;
+    }
+
+    /* Floating hearts when love is clicked */
+    .floating-heart {
+      position: fixed;
+      font-size: 26px;
+      color: #ff416c;
+      pointer-events: none;
+      animation: heartRise 1.6s forwards ease-out;
+      z-index: 1000;
+    }
+    @keyframes heartRise {
+      0% { transform: translate(-50%, -50%) scale(0.6); opacity: 1; }
+      100% { transform: translate(calc(-50% + (random(60) - 30)px), -150px) scale(1.8); opacity: 0; }
+    }
+
+    /* Footer */
+    .footer-text {
+      text-align: center;
+      color: #718096;
+      font-size: 13px;
+      margin-top: 20px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Musik Latar Sheila on 7 - Anugerah Terindah Yang Pernah Kumiliki -->
+  <audio id="bg-music" loop preload="auto">
+    <source src="anugerah_terindah.mp3" type="audio/mp3">
+    <source src="lagu.mp3" type="audio/mp3">
+    <source src="https://archive.org/download/sheilaon7anugerahterindahyangpernahkumilikipluslirik/Sheila%20On%207%20-%20Anugerah%20Terindah%20Yang%20Pernah%20Kumiliki%20%28Plus%20Lirik%29.mp3" type="audio/mp3">
+  </audio>
+
+  <!-- Tombol Musik Melayang (Bisa di-play / pause kapan saja) -->
+  <button class="music-ctrl" id="music-toggle" onclick="toggleMusic()" title="Putar / Jeda Musik">
+    <span class="music-icon">🎵</span>
+    <span id="music-status">Musik On</span>
+  </button>
+
+  <!-- Ornamen Melayang di Latar Belakang -->
+  <div class="bg-bubbles" id="bubbles"></div>
+
+  <!-- Screen 1: Layar Buka Kado Utama -->
+  <div id="welcome-screen">
+    <div class="gift-box" onclick="openGreeting()">🎁</div>
+    <h1 style="font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">Ada Kado Spesial Untukmu!</h1>
+    <p style="font-size: 15px; opacity: 0.95; margin-top: 8px;">Ketuk kado atau tombol di bawah untuk membuka semua kejutannya ✨</p>
+    <button class="welcome-btn" onclick="openGreeting()">Buka Kado Sekarang 🎂</button>
+  </div>
+
+  <!-- Konten Utama Halaman (Scrollable & Panjang) -->
+  <div class="page-content">
+
+    <!-- KARTU 1: PROFIL & HARI SPESIAL -->
+    <div class="glass-card">
+      <div class="photo-wrapper">
+        <div class="crown">👑</div>
+        <div class="photo-frame">
+          <img id="profile-img" 
+               src="foto.jpg" 
+               alt="Foto My Just Friend" 
+               onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'"/>
+        </div>
+      </div>
+
+      <div class="subtitle">Happy Birthday!</div>
+      <h2 class="person-name">My Just Friend ✨</h2>
+      <div class="badge-tag">Hari Kelahiran yang Penuh Berkah 🎉</div>
+
+      <p style="color: #4a5568; font-size: 15px; line-height: 1.7; margin-top: 6px;">
+        Hari ini adalah hari istimewa milikmu! Semoga setiap langkah yang kamu ambil selalu diberkahi, 
+        diberi senyum yang tulus, dan dikelilingi oleh cinta serta kebahagiaan tanpa akhir.
+      </p>
+
+      <!-- Petikan Lagu Anugerah Terindah -->
+      <div class="song-box">
+        <div class="song-title">
+          <span>🎵</span> Sheila on 7 — Anugerah Terindah
+        </div>
+        <div class="song-lyrics">
+          "Melihat tawamu, mendengar senandungmu... <br>
+          Menjadikan hariku terasa lebih berwarna dan berarti." ✨
+        </div>
+      </div>
+    </div>
+
+    <!-- KARTU 2: SURAT SPESIAL PERSAHABATAN -->
+    <div class="glass-card letter-section">
+      <div class="letter-title">
+        <span>💌</span> Sepucuk Surat Untukmu
+      </div>
+      <div class="letter-body">
+        <p>
+          <strong>Hai sahabatku tersayang,</strong>
+        </p>
+        <p>
+          Di hari bahagiamu ini, aku cuma mau mengucapkan terima kasih yang sangat besar. 
+          Terima kasih sudah menjadi sosok yang selalu menyenangkan, penuh keceriaan, dan selalu bisa diandalkan. 
+          Kehadiranmu selalu punya cara tersendiri untuk membuat hari-hari biasa jadi terasa lebih istimewa.
+        </p>
+        <p>
+          Di usiamu yang baru ini, aku berdoa setulus hati: semoga semua impian, cita-cita, dan rencana baikmu dipermudah jalannya. 
+          Ketika menghadapi lelah atau rintangan, ingat ya bahwa kamu itu kuat dan punya orang-orang yang selalu mendukungmu dari dekat.
+        </p>
+        <p>
+          Jangan pernah berhenti tersenyum dan menebarkan energi positifmu. Tetaplah menjadi dirimu yang apa adanya, 
+          karena bagi kami, kamu adalah anugerah yang luar biasa!
+        </p>
+        <div class="letter-sign">
+          Dari sahabat terbaikmu ✨
+        </div>
+      </div>
+    </div>
+
+    <!-- KARTU 3: KENAPA KAMU ITU ISTIMEWA -->
+    <div class="glass-card">
+      <h3 style="font-size: 20px; font-weight: 700; color: #ff5e7e; margin-bottom: 6px;">
+        🌟 3 Hal yang Membuatmu Sangat Spesial
+      </h3>
+      <p style="font-size: 13.5px; color: #718096;">Bukan cuma sahabat biasa, tapi sosok yang luar biasa:</p>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🌻</div>
+          <div class="feature-title">Selalu Ceria</div>
+          <div class="feature-desc">Senyum dan tawamu selalu berhasil menularkan kebahagiaan ke orang sekitar.</div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🤝</div>
+          <div class="feature-title">Sahabat Sejati</div>
+          <div class="feature-desc">Selalu tulus menemani, saling berbagi cerita tanpa rasa ragu.</div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">💎</div>
+          <div class="feature-title">Pribadi Kuat</div>
+          <div class="feature-desc">Penuh semangat dalam mengejar mimpi dan tidak mudah menyerah.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KARTU 4: TIUP LILIN & POTONG KUE -->
+    <div class="glass-card">
+      <h3 style="font-size: 21px; font-weight: 700; color: #ff5e7e; margin-bottom: 4px;">
+        🎂 Tiup Lilin & Potong Kue Ulang Tahun
+      </h3>
+      <p style="font-size: 14px; color: #718096; margin-bottom: 12px;">
+        Make a wish di dalam hati dulu, lalu ketuk lilin dan kuenya!
+      </p>
+
+      <div class="cake-interaction">
+        <!-- Lilin -->
+        <div class="candle-flame" id="flame" onclick="blowCandle()" title="Ketuk untuk tiup lilin">🔥</div>
+        <br>
+        <!-- Kue -->
+        <div class="cake-wrapper" id="cake" onclick="cutCake()" title="Ketuk untuk potong kue">🎂</div>
+      </div>
+
+      <div class="cake-status-msg" id="cake-status">
+        Ketuk lilin untuk meniup doa 🕯️
+      </div>
+
+      <button class="love-btn" style="padding: 10px 26px; font-size: 14px; margin-top: 15px;" onclick="shootCelebration()">
+        Tembakkan Kembang Api 🎊
+      </button>
+    </div>
+
+    <!-- KARTU 5: KOTAK BUKA DOA & HARAPAN -->
+    <div class="glass-card">
+      <h3 style="font-size: 20px; font-weight: 700; color: #ff5e7e; margin-bottom: 6px;">
+        🎁 Kotak Doa & Harapan Terbaik
+      </h3>
+      <p style="font-size: 13.5px; color: #718096; margin-bottom: 14px;">
+        Buka setiap kotak di bawah untuk melihat doa-doa tulus untukmu:
+      </p>
+
+      <div class="wishes-container">
+        <div class="wish-box-card" onclick="openWish(this, 'Kesehatan yang selalu prima, raga yang bugar, dan dijauhkan dari segala penyakit! 🌿')">
+          <div class="wish-icon">🩺</div>
+          <div class="wish-name">Kesehatan</div>
+        </div>
+
+        <div class="wish-box-card" onclick="openWish(this, 'Semua target, impian, dan karirmu dilancarkan serta sukses besar! 🚀')">
+          <div class="wish-icon">🌟</div>
+          <div class="wish-name">Kesuksesan</div>
+        </div>
+
+        <div class="wish-box-card" onclick="openWish(this, 'Hati yang selalu tenang, damai, dan dipenuhi senyuman setiap hari! 💖')">
+          <div class="wish-icon">🌸</div>
+          <div class="wish-name">Kedamaian</div>
+        </div>
+
+        <div class="wish-box-card" onclick="openWish(this, 'Rezeki yang berkah, melimpah, dan bermanfaat bagi sesama! 🍀')">
+          <div class="wish-icon">💰</div>
+          <div class="wish-name">Keberkahan</div>
+        </div>
+      </div>
+
+      <div id="wish-detail" style="margin-top: 16px; font-size: 14px; font-weight: 600; color: #d81b60; min-height: 24px;">
+        (Klik salah satu kotak doa di atas ✨)
+      </div>
+    </div>
+
+    <!-- KARTU 6: SEND LOVE & BALAS CHAT -->
+    <div class="glass-card">
+      <h3 style="font-size: 21px; font-weight: 700; color: #ff5e7e;">
+        Kirim Pelukan & Cinta Virtual ❤️
+      </h3>
+      <p style="font-size: 14px; color: #718096; margin-top: 6px;">
+        Klik tombol hati di bawah untuk mengirimkan pelukan hangat sebanyak-banyaknya:
+      </p>
+
+      <button class="love-btn" onclick="sendLove(event)">
+        Kirim Pelukan & Cinta ❤️
+      </button>
+
+      <div class="love-counter">
+        <span id="love-count">0</span> Pelukan Telah Terkirim 💕
+      </div>
+
+      <div style="margin-top: 25px; padding-top: 18px; border-top: 1px dashed #ffd1dc;">
+        <p style="font-size: 13.5px; color: #555; margin-bottom: 10px;">Ingin membalas ucapan ini ke WhatsApp?</p>
+        <a href="https://api.whatsapp.com/send?text=Makasih%20banyak%20buat%20ucapan%20dan%20kejutan%20ulang%20tahunnya!%20Suka%20banget%20%E2%9D%A4%EF%B8%8F" 
+           target="_blank" 
+           style="display: inline-block; background: #25D366; color: white; text-decoration: none; padding: 10px 22px; border-radius: 50px; font-weight: 700; font-size: 13.5px; box-shadow: 0 6px 16px rgba(37, 211, 102, 0.35);">
+          💬 Balas via WhatsApp
+        </a>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-text">
+      Dibuat dengan segenap rasa sayang untuk <strong>My Just Friend</strong> 🌸<br>
+      Selamat Ulang Tahun & Bahagia Selalu!
+    </div>
+
+  </div>
+
+  <script>
+    const music = document.getElementById("bg-music");
+    const musicBtn = document.getElementById("music-toggle");
+    const musicStatus = document.getElementById("music-status");
+    let isPlaying = false;
+    let candleBlown = false;
+    let cakeCut = false;
+    let loves = 0;
+
+    // Saat Kado Dibuka
+    function openGreeting() {
+      document.getElementById("welcome-screen").classList.add("hidden");
+      playMusic();
+      shootCelebration();
+    }
+
+    // Pemutar Musik
+    function playMusic() {
+      music.play().then(() => {
+        isPlaying = true;
+        musicBtn.classList.add("music-playing");
+        musicStatus.innerText = "Sheila on 7 🎵";
+      }).catch(err => {
+        console.log("Autoplay dicegah browser, butuh klik:", err);
+      });
+    }
+
+    function toggleMusic() {
+      if (isPlaying) {
+        music.pause();
+        isPlaying = false;
+        musicBtn.classList.remove("music-playing");
+        musicStatus.innerText = "Musik Off 🔇";
+      } else {
+        music.play();
+        isPlaying = true;
+        musicBtn.classList.add("music-playing");
+        musicStatus.innerText = "Sheila on 7 🎵";
+      }
+    }
+
+    // Efek Tiup Lilin
+    function blowCandle() {
+      const flame = document.getElementById("flame");
+      const status = document.getElementById("cake-status");
+      if (!candleBlown) {
+        flame.classList.add("blown");
+        flame.innerText = "💨";
+        status.innerText = "Yayy! Lilin padam, semoga segala doamu terkabul! Sekarang potong kuenya 🍰";
+        candleBlown = true;
+        shootCelebration();
+      } else {
+        flame.classList.remove("blown");
+        flame.innerText = "🔥";
+        status.innerText = "Ketuk lilin untuk tiup doa 🕯️";
+        candleBlown = false;
+      }
+    }
+
+    // Efek Potong Kue
+    function cutCake() {
+      const cake = document.getElementById("cake");
+      const status = document.getElementById("cake-status");
+      if (!cakeCut) {
+        cake.innerText = "🍰✨";
+        status.innerText = "Nyam! Kuenya sudah dipotong, manis dan lezat seperti harimu! 😋🎉";
+        cakeCut = true;
+        shootCelebration();
+      } else {
+        cake.innerText = "🎂";
+        status.innerText = "Kue utuh kembali! Siap dirayakan lagi 🎂";
+        cakeCut = false;
+      }
+    }
+
+    // Buka Kotak Doa
+    function openWish(element, message) {
+      document.querySelectorAll('.wish-box-card').forEach(c => c.classList.remove('opened'));
+      element.classList.add('opened');
+      document.getElementById('wish-detail').innerText = message;
+      shootConfettiSmall();
+    }
+
+    // Kirim Pelukan / Love Counter
+    function sendLove(e) {
+      loves++;
+      document.getElementById('love-count').innerText = loves;
+
+      // Animasi hati melayang
+      const heart = document.createElement('div');
+      heart.className = 'floating-heart';
+      heart.innerText = ['❤️', '💖', '💕', '🥰', '🌸'][Math.floor(Math.random() * 5)];
+      heart.style.left = e.clientX + 'px';
+      heart.style.top = e.clientY + 'px';
+      document.body.appendChild(heart);
+
+      setTimeout(() => {
+        heart.remove();
+      }, 1600);
+
+      if (loves % 5 === 0) {
+        shootCelebration();
+      }
+    }
+
+    // Konfeti Penuh / Kembang Api
+    function shootCelebration() {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+
+      setTimeout(() => {
+        confetti({
+          particleCount: 60,
+          angle: 60,
+          spread: 60,
+          origin: { x: 0 }
+        });
+        confetti({
+          particleCount: 60,
+          angle: 120,
+          spread: 60,
+          origin: { x: 1 }
+        });
+      }, 250);
+    }
+
+    // Konfeti Ringan
+    function shootConfettiSmall() {
+      confetti({
+        particleCount: 40,
+        spread: 50,
+        origin: { y: 0.7 }
+      });
+    }
+
+    // Elemen Latar Belakang Melayang
+    function createFloatingElements() {
+      const icons = ['🎈', '💖', '✨', '🌸', '⭐', '🎉', '🍰', '💌'];
+      const container = document.getElementById('bubbles');
+      for (let i = 0; i < 18; i++) {
+        const span = document.createElement('span');
+        span.className = 'bubble';
+        span.innerText = icons[Math.floor(Math.random() * icons.length)];
+        span.style.left = Math.random() * 95 + 'vw';
+        span.style.animationDuration = (6 + Math.random() * 6) + 's';
+        span.style.animationDelay = (Math.random() * 5) + 's';
+        span.style.fontSize = (18 + Math.random() * 20) + 'px';
+        container.appendChild(span);
+      }
+    }
+    createFloatingElements();
+  </script>
+</body>
+</html>
